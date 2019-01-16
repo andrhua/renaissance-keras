@@ -1,0 +1,8 @@
+trainingInput:
+  scaleTier: CUSTOM
+  masterType: large_model
+  jobDir: gs://rnssnce
+  region: europe-west1
+  pythonModule: task
+  pythonVersion: "3.5"
+  runtimeVersion: "1.12"

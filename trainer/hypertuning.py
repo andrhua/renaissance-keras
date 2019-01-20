@@ -12,10 +12,10 @@ def get_best_params():
         'dense_activation': relu,
         'optimizer': Adam,
         'loss': categorical_crossentropy,
-        'epochs': 20,
+        'epochs': 5,
         'batch_size': 256,
-        'train_samples_per_class': 18000,
-        'eval_samples_per_class': 2000
+        'train_samples_per_class': 900,
+        'eval_samples_per_class': 100
     }
 
 

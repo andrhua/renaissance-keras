@@ -112,7 +112,6 @@ def make_numpy_data(vfold_ratio=0.2):
     return x_train, y_train, x_test, y_test, class_names
 
 
-
 if __name__ == '__main__':
     prune()
     to_tfrecords()

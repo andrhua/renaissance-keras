@@ -1,5 +1,4 @@
 import os
-import time
 from tensorflow.python import keras
 from tensorflow.python.keras import layers
 from tensorflow.python.keras.callbacks import TensorBoard, EarlyStopping
@@ -13,10 +12,12 @@ class QDModel:
 
         inputs = layers.Input(shape=(784,), dtype='float32')
         x = layers.Reshape((28, 28, 1))(inputs)
-        filters_num = [16, 32, 64]
-        for filters in filters_num:
-            x = layers.Convolution2D(filters, kernel_size=(3, 3), padding='same', activation='relu')(x)
-            x = layers.MaxPooling2D(pool_size=(2, 2))(x)
+        filters = [16, 32, 64]
+        kernel_size = [3, 6, 9]
+        pool_size = [2, 2, 2]
+        for i in range(len(filters)):
+            x = layers.Convolution2D(filters[i], (kernel_size[i], kernel_size[i]), padding='same', activation='relu')(x)
+            x = layers.MaxPooling2D((pool_size[i], pool_size[i]))(x)
         x = layers.Flatten()(x)
         x = layers.Dense(units=params['dense_units'], activation=params['dense_activation'])(x)
         predictions = layers.Dense(units=345, activation='softmax')(x)
@@ -28,8 +29,9 @@ class QDModel:
         print(model.summary())
         self.model = model
 
-    def train(self, train, eval, params):
-        tensorboard = TensorBoard(histogram_freq=2,
+    def train(self, train, eval, export_path, params):
+        tensorboard = TensorBoard(log_dir=os.path.join(export_path, "logs"),
+                                  histogram_freq=2,
                                   batch_size=params['batch_size'],
                                   write_graph=True,
                                   write_images=True)
@@ -48,8 +50,7 @@ class QDModel:
         print('Test accuracy: {:0.2f}%'.format(score[1] * 100))
 
     def to_saved_model(self, export_path):
-        builder = saved_model_builder.SavedModelBuilder(
-            os.path.join(export_path, str(int(time.time()))))
+        builder = saved_model_builder.SavedModelBuilder(export_path)
 
         signature = predict_signature_def(
             inputs={'in': self.model.inputs[0]},

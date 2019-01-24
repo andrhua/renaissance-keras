@@ -12,15 +12,15 @@ class QDModel:
 
         inputs = layers.Input(shape=(784,), dtype='float32')
         x = layers.Reshape((28, 28, 1))(inputs)
-        filters = [16, 32, 64]
-        kernel_size = [3, 6, 9]
-        pool_size = [2, 2, 2]
+        filters = [16, 32, 64, 96]
+        kernel_size = [3, 3, 3, 3]
+        pool_size = [2, 2, 2, 2]
         for i in range(len(filters)):
             x = layers.Convolution2D(filters[i], (kernel_size[i], kernel_size[i]), padding='same', activation='relu')(x)
             x = layers.MaxPooling2D((pool_size[i], pool_size[i]))(x)
         x = layers.Flatten()(x)
         x = layers.Dense(units=params['dense_units'], activation=params['dense_activation'])(x)
-        predictions = layers.Dense(units=345, activation='softmax')(x)
+        predictions = layers.Dense(units=params['classes'], activation='softmax')(x)
 
         model = keras.models.Model(inputs=inputs, outputs=predictions)
         model.compile(optimizer=params['optimizer'](),
@@ -30,7 +30,7 @@ class QDModel:
         self.model = model
 
     def train(self, train, eval, export_path, params):
-        tensorboard = TensorBoard(log_dir=os.path.join(export_path, "logs"),
+        tensorboard = TensorBoard(log_dir='./logs',
                                   histogram_freq=2,
                                   batch_size=params['batch_size'],
                                   write_graph=True,
@@ -41,8 +41,8 @@ class QDModel:
                               verbose=2,
                               callbacks=[tensorboard, early_stop],
                               validation_data=eval,
-                              steps_per_epoch=(345 * params['train_samples_per_class']) // params['batch_size'],
-                              validation_steps=(345 * params['eval_samples_per_class']) // params['batch_size'],
+                              steps_per_epoch=(params['classes'] * params['train_samples_per_class']) // params['batch_size'],
+                              validation_steps=(params['classes'] * params['eval_samples_per_class']) // params['batch_size'],
                               )
 
     def evaluate(self, test_data):

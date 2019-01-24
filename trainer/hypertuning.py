@@ -10,12 +10,13 @@ def get_best_params():
     return {
         'dense_units': 512,
         'dense_activation': relu,
-        'optimizer': Adam,
+        'optimizer': Adadelta,
         'loss': categorical_crossentropy,
-        'epochs': 5,
+        'epochs': 20,
         'batch_size': 256,
-        'train_samples_per_class': 900,
-        'eval_samples_per_class': 100
+        'classes': 345,
+        'train_samples_per_class': 20000,
+        'eval_samples_per_class': 2000
     }
 
 
@@ -24,12 +25,12 @@ p = {
     'dense_activation': [relu],
     'optimizer': [Adam, Nadam, Adadelta],
     'loss': [categorical_crossentropy],
-    'epochs': [5, 10, 15, 20, 25],
+    'epochs': [10, 15, 20, 25],
     'batch_size': [8, 64, 256],
     'dropout': [None],
     'weight_regulizer': [None],
-    'train_samples_per_class': 900,
-    'eval_samples_per_class': 100
+    'train_samples_per_class': 800,
+    'eval_samples_per_class': 200
 }
 
 

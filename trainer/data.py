@@ -6,11 +6,12 @@ from tensorflow.python import keras
 from tensorflow.python.lib.io import file_io
 from io import BytesIO
 
-root = '/mnt/property/data/'
-raw = root + 'raw'
-test = root + 'test'
-eval = root + 'eval'
-train = root + 'train'
+ssd = '/mnt/property/data/'
+hdd = '/mnt/vanity/data/'
+raw = hdd + 'raw'
+test = hdd + 'test'
+eval = ssd + 'eval'
+train = ssd + 'train'
 
 
 def split_name(file):
@@ -45,7 +46,7 @@ def to_tfrecords():
 
 
 def make_dataset(params):
-    one_hot = tf.one_hot(list(range(345)), 345, dtype=tf.int64)
+    one_hot = tf.one_hot(list(range(params['classes'])), params['classes'], dtype=tf.int64)
     features = {'image': tf.FixedLenFeature([784], tf.float32),
                 'label': tf.FixedLenFeature([1], tf.int64)}
 
@@ -56,11 +57,11 @@ def make_dataset(params):
     def get_shuffled_dataset(root):
         return tf.data.TFRecordDataset.list_files(os.path.join(root, '*.tfrecords')).repeat() \
             .apply(tf.data.experimental.parallel_interleave(lambda x: tf.data.TFRecordDataset(x).map(_parse_func),
-                                                            cycle_length=345,
+                                                            cycle_length=params['classes'],
                                                             block_length=10,
                                                             sloppy=True
                                                             )) \
-            .shuffle(buffer_size=345*10) \
+            .shuffle(buffer_size=params['classes']*10) \
             .batch(params['batch_size']) \
             .prefetch(1000)
 
@@ -70,9 +71,9 @@ def make_dataset(params):
     return train_data, eval_data
 
 
-def make_numpy_data(vfold_ratio=0.2):
+def make_numpy_data(params, vfold_ratio=0.2):
     # files = file_io.get_matching_files(FLAGS.train_data)
-    files = glob.glob(os.path.join('/mnt/vanity/new', '*.npy'))
+    files = glob.glob(os.path.join(raw, '*.npy'))
 
     x = np.empty([0, 28 ** 2])
     y = np.empty([0])
@@ -81,8 +82,10 @@ def make_numpy_data(vfold_ratio=0.2):
     for idx, file in enumerate(files):
         # arr_bytes = file_io.read_file_to_string(file, True)
         # data = np.load(BytesIO(arr_bytes))
+        if idx > 1:
+            break
         data = np.load(file)
-        data = data[0: 1000, :]
+        data = data[0: params['train_samples_per_class'], :]
         labels = np.full(data.shape[0], idx)
 
         x = np.concatenate((x, data), axis=0)
@@ -113,5 +116,9 @@ def make_numpy_data(vfold_ratio=0.2):
 
 
 if __name__ == '__main__':
-    prune()
-    to_tfrecords()
+    # prune()
+    # to_tfrecords()
+    files = glob.glob(os.path.join(raw, '*.npy'))
+    for i, file in enumerate(files):
+        class_name, ext = os.path.splitext(os.path.basename(file))
+        print(class_name)

@@ -11,9 +11,8 @@ if __name__ == "__main__":
     sess = tf.Session()
     keras.backend.set_session(sess)
 
-    from trainer.data import make_dataset, make_numpy_data
+    from trainer.data import make_dataset
     train, eval = make_dataset(params)
-    # x_train, y_train, x_test, y_test = make_numpy_data()
     m = QDModel(params)
     export_path = os.path.join('export', str(int(time.time())))
     m.train(train, eval, export_path, params)

@@ -1,5 +1,3 @@
-# Renaissance
-
 Simple keras model for drawings recognition set up to be uploaded on Google Cloud Platform for faster learning.
 
 ### Prerequisites

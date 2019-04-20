@@ -31,6 +31,16 @@ def parse_args():
         help="Batch size for training"
     )
     parser.add_argument(
+        "--train_src",
+        type=str,
+        help="Directory containing train data in tfrecords format"
+    )
+    parser.add_argument(
+        "--eval_src",
+        type=str,
+        help="Directory containing evaluation data in tfrecords format"
+    )
+    parser.add_argument(
         "--train_size",
         type=int,
         default=10000,
@@ -57,7 +67,7 @@ def make_datasets():
 
     :return: pair of train and evaluation datasets
     """
-    one_hot = tf.one_hot(list(range(flags.classes)), flags.classes, dtype=tf.int64)
+    one_hot = tf.one_hot(list(range(FLAGS.classes)), FLAGS.classes, dtype=tf.int64)
     features = {'image': tf.FixedLenFeature([784], tf.float32),
                 'label': tf.FixedLenFeature([1], tf.int64)}
 
@@ -68,27 +78,27 @@ def make_datasets():
     def get_dataset(root, shuffle=True):
         data = tf.data.TFRecordDataset.list_files(os.path.join(root, '*.tfrecords')).repeat()\
             .apply(tf.data.experimental.parallel_interleave(lambda x: tf.data.TFRecordDataset(x).map(_parse_func),
-                                                            cycle_length=flags.classes,
+                                                            cycle_length=FLAGS.classes,
                                                             block_length=10,
                                                             sloppy=True
                                                             ))
         if shuffle:
-            data = data.shuffle(buffer_size=flags.classes * 10)
+            data = data.shuffle(buffer_size=FLAGS.classes * 10)
         return data\
-            .batch(flags.batch_size)\
+            .batch(FLAGS.batch_size)\
             .prefetch(1000)
 
-    return get_dataset(flags.train_src), get_dataset(flags.eval_src, False)
+    return get_dataset(FLAGS.train_src), get_dataset(FLAGS.eval_src, False)
 
 
 if __name__ == "__main__":
-    flags, unparsed = parse_args()
+    FLAGS, unparsed = parse_args()
     tf.logging.set_verbosity(tf.logging.DEBUG)
     sess = tf.Session()
     keras.backend.set_session(sess)
 
     train, eval = make_datasets()
-    model = QDModel(flags)
+    model = QDModel(FLAGS)
     export_path = os.path.join('export', str(int(time.time())))
-    model.train(train, eval, flags)
+    model.train(train, eval, FLAGS)
     model.to_saved_model(export_path)

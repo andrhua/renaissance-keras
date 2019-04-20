@@ -10,25 +10,30 @@ def parse_args():
     parser.add_argument(
         "--src",
         type=str,
-        help="Path to raw data in numpy arrays format")
+        help="Path to raw data in numpy arrays format"
+    )
     parser.add_argument(
         "--train_dst",
         type=str,
-        help="Path to write train data in tfrecords format")
+        help="Path to write train data in tfrecords format"
+    )
     parser.add_argument(
         "--eval_dst",
         type=str,
-        help="Path to write evaluation data in tfrecords format")
+        help="Path to write evaluation data in tfrecords format"
+    )
     parser.add_argument(
         "--train_size",
         type=int,
         default=10000,
-        help="Number of samples per class taken from numpy array for training")
+        help="Number of samples per class taken from numpy array for training"
+    )
     parser.add_argument(
         "--eval_size",
         type=int,
         default=2000,
-        help="Number of samples per class taken from numpy array for evaluation")
+        help="Number of samples per class taken from numpy array for evaluation"
+    )
     return parser.parse_known_args()
 
 
